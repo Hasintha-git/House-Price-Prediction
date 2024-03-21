@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>House Price Prediction</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.css">
+    <style>
+        /* Add your CSS styles here */
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            text-align: center;
+        }
+        #prediction-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #prediction {
+            font-weight: bold;
+        }
+        form {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        input[type="number"],
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #prediction-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #prediction {
+            font-weight: bold;
+        }
+
+        #error-message {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        
+        <h1 class="text-center">House Price Prediction</h1>
+        <form id="predictionForm" class="mt-5">
+            <div class="form-group row">
+                <label for="MSSubClass" class="col-sm-3 col-form-label">MSSubClass:</label>
+                <input id="MSSubClass" class="form-control" value="60" name="MSSubClass" required></input><br><br>
+            </div>
+
+            <div class="form-group row">
+                <label for="MSZoning" class="col-sm-3 col-form-label">MSZoning:</label>
+                <select id="MSZoning" class="form-control" value="RH" name="MSZoning" required>
+                    {% for option in MSZoning_options %}
+                    <option value="{{ option }}">{{ option }}</option>
+                    {% endfor %}
+                </select><br><br>
+            </div>
+
+            <div class="form-group row">
+                <label for="LotFrontage" class="col-sm-3 col-form-label">LotFrontage:</label>
+                <input type="number" class="form-control" value="65.0" id="LotFrontage" name="LotFrontage" step="0.1" required><br><br>
+            </div>
+
+            <div class="form-group row">
+                <label for="LotArea" class="col-sm-3 col-form-label">LotArea:</label>
+                <input type="number" class="form-control" value="8450" id="LotArea" name="LotArea" required><br><br>
+        </div>
+        <div class="form-group row">
+            <label for="Street" class="col-sm-3 col-form-label">Street:</label>
+            <select id="Street" class="form-control" value="Pave" name="Street" required>
+                {% for option in Street_options %}
+                <option value="{{ option }}">{{ option }}</option>
+                {% endfor %}
+            </select><br><br>
+        </div>
+        <div class="form-group row">
+            <label for="SaleCondition" class="col-sm-3 col-form-label">SaleCondition:</label>
+            <select id="SaleCondition" class="form-control" value="Normal" name="SaleCondition" required>
+                {% for option in SaleCondition_options %}
+                <option value="{{ option }}">{{ option }}</option>
+                {% endfor %}
+            </select><br><br>
+        </div>
+        <div class="form-group row">
+            <label for="YearBuilt" class="col-sm-3 col-form-label">YearBuilt:</label>
+            <select id="YearBuilt" class="form-control" value="2003" name="YearBuilt" required>
+                {% for option in YearBuilt_options %}
+                <option value="{{ option }}">{{ option }}</option>
+                {% endfor %}
+            </select><br><br>
+        </div>
+        <div class="form-group row">
+            <label for="BedroomAbvGr" class="col-sm-3 col-form-label">BedroomAbvGr:</label>
+            <select id="BedroomAbvGr" class="form-control" value="3" name="BedroomAbvGr" required>
+                {% for option in BedroomAbvGr_options %}
+                <option value="{{ option }}">{{ option }}</option>
+                {% endfor %}
+            </select><br><br>
+        </div>
+
+        <div class="form-group row">
+            <label for="HouseStyle" class="col-sm-3 col-form-label">HouseStyle:</label>
+            <select id="HouseStyle" class="form-control" value="2Story" name="HouseStyle" required>
+                {% for option in HouseStyle_options %}
+                <option value="{{ option }}">{{ option }}</option>
+                {% endfor %}
+            </select><br><br>
+        </div>
+
+        
+        <div class="form-group row">
+            <button type="button" class="btn btn-primary" onclick="predictVal()">Predict</button>
+        </div>
+        </form>
+    </div>
+
+    <div id="prediction-container">
+        <div id="prediction"></div>
+        <div id="error-message"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
+
+    <script>
+        fetchAndSetDefaults();
+        // Function to fetch unique values and set default values
+        async function fetchAndSetDefaults() {
+            const response = await fetch('/defaults');
+            const defaults = await response.json();
+
+            for (let key in defaults) {
+                const selectElement = document.getElementById(key);
+                defaults[key].forEach(value => {
+                    const option = document.createElement("option");
+                    option.text = value;
+                    selectElement.add(option);
+                });
+            }
+        }
+
+        function predictVal() {
+            // Get input values
+            var MSSubClass = document.getElementById('MSSubClass').value;
+            var MSZoning = document.getElementById('MSZoning').value;
+            var LotFrontage = document.getElementById('LotFrontage').value;
+            var LotArea = document.getElementById('LotArea').value;
+            var Street = document.getElementById('Street').value;
+            var SaleCondition = document.getElementById('SaleCondition').value;
+            var YearBuilt = document.getElementById('YearBuilt').value;
+            var BedroomAbvGr = document.getElementById('BedroomAbvGr').value;
+            var HouseStyle = document.getElementById('HouseStyle').value;
+
+            // Create JSON object with input data
+            var inputData = {
+                "MSSubClass": MSSubClass,
+                "MSZoning": MSZoning,
+                "LotFrontage": LotFrontage,
+                "LotArea": LotArea,
+                "Street": Street,
+                "SaleCondition": SaleCondition,
+                "YearBuilt": YearBuilt,
+                "BedroomAbvGr": BedroomAbvGr,
+                "HouseStyle": HouseStyle
+            };
+
+            // Send POST request to Flask server
+            fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(inputData)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Display prediction in the HTML
+                    document.getElementById('prediction').innerText = 'Prediction: ' + data.prediction;
+                    swal("Prediction", "Prediction: $" + data.prediction, "success");
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    // Display error message in the HTML
+                    document.getElementById('prediction').innerText = 'Error: ' + error;
+                    swal("Error", "An error occurred: " + error.message, "error");
+                });
+        }
+    </script>
+</body>
+
+</html>
