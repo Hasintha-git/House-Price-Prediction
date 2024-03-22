@@ -3,10 +3,10 @@
 - Open web browser and http://127.0.0.1:5000/ you can see frontend
 
 ## Submit Form
-![alt](assets/main.png)
+![alt](src/assets/main.png)
 
 ## Result
-![alt](assets/result.png)
+![alt](src/assets/result.png)
 
 # House Price Prediction - 2024 (Kaggle Compitition)
 

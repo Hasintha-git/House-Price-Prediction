@@ -10,7 +10,7 @@ model = None
 
 # Load the model from the .pkl file
 try:
-    with open('model/house_price_prediction_model.pkl', 'rb') as f:
+    with open('src/model/house_price_prediction_model.pkl', 'rb') as f:
         model = pickle.load(f)
     print("Model loaded successfully.")
 
@@ -22,7 +22,7 @@ except Exception as e:
     print("Error:", e)
 
 # Load data from test.csv
-test_data = pd.read_csv('data/test.csv')
+test_data = pd.read_csv('src/data/test.csv')
 
 # Get unique values for dropdown options
 MSZoning_options = test_data['MSZoning'].unique().tolist()
